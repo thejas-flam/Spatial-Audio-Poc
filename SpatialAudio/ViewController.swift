@@ -237,15 +237,18 @@ class ViewController: UIViewController {
 //            print("Listener orientation: \(currentAngle)")  // For debugging
 //        }
         
-        var currentPan: Float = -1.0
-        let maxPan: Float = 1.0
+        var currentPan: Float = -1.5  // Start at the leftmost position
+        var panDirection: Float = 0.05  // The rate at which the pan changes
         
         Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { timer in
             // Increase pan value
-            currentPan += 0.05
+            currentPan += panDirection
             
-            if currentPan >= maxPan {
-                currentPan = -1.0  // Reset pan to start
+            // Reverse the direction when the pan hits the bounds (-1.0 or 1.0)
+            if currentPan >= 1.5 {
+                panDirection = -0.05  // Start moving back to the left
+            } else if currentPan <= -1.0 {
+                panDirection = 0.05  // Start moving back to the right
             }
             
             // Update the pan position (left: -1.0, right: 1.0)
