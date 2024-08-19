@@ -81,7 +81,7 @@ class ViewController: UIViewController {
         audioEngine = AVAudioEngine()
         
         // Create and attach the environment node
-        environmentNode = AVAudioEnvironmentNode()
+        //environmentNode = AVAudioEnvironmentNode()
         
         playerNode = AVAudioPlayerNode()
         mixerNode = AVAudioMixerNode()
@@ -92,7 +92,7 @@ class ViewController: UIViewController {
         
         
         audioEngine.attach(playerNode)
-        audioEngine.attach(environmentNode)
+        //audioEngine.attach(environmentNode)
         audioEngine.attach(mixerNode)
         
         // Connect the environment node to the main mixer
@@ -212,6 +212,36 @@ class ViewController: UIViewController {
         
     }
     
+    func applyPanningAndDelay() {
+        
+        let leftChannelDelay = AVAudioUnitDelay()
+        let rightChannelDelay = AVAudioUnitDelay()
+        
+        leftChannelDelay.delayTime = 0.01 // Simulate slight delay for the left channel
+        rightChannelDelay.delayTime = 0.02 // Simulate slight delay for the right channel
+        
+        // Adjust the feedback and wet-dry mix for subtlety
+        leftChannelDelay.feedback = 20
+        rightChannelDelay.feedback = 20
+        
+        // Connect nodes
+        audioEngine.attach(leftChannelDelay)
+        audioEngine.attach(rightChannelDelay)
+        
+        let format = AVAudioFormat(standardFormatWithSampleRate: audioFile.processingFormat.sampleRate, channels: 2)!
+        
+        audioEngine.connect(playerNode, to: leftChannelDelay, format: format)
+        audioEngine.connect(leftChannelDelay, to: mixerNode, format: format)
+        
+        audioEngine.connect(playerNode, to: rightChannelDelay, format: format)
+        audioEngine.connect(rightChannelDelay, to: mixerNode, format: format)
+        
+        audioEngine.connect(mixerNode, to: audioEngine.mainMixerNode, format: format)
+        
+        try? audioEngine.start()
+        
+    }
+    
     func startMovingAudioSource() {
         
         var currentX: Float = -5.0
@@ -253,6 +283,7 @@ class ViewController: UIViewController {
             
             // Update the pan position (left: -1.0, right: 1.0)
             self.mixerNode.pan = currentPan
+            self.mixerNode.position
             print("Pan position: \(currentPan)")  // Debugging
         }
         
